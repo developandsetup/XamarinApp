@@ -35,12 +35,13 @@
                                       Grid.Row="0"
                                       Grid.Column="0"
                                       Grid.RowSpan="3"
-                                      Grid.ColumnSpan="3">
+                                      Grid.ColumnSpan="3" 
+                                  Scrolled="CrvImages_Scrolled">
 
 
                         <CarouselView.ItemTemplate>
                             <DataTemplate>
-                                <forms:CachedImage />
+                                <forms:CachedImage Source="{Binding FullImageUrl}" />
                             </DataTemplate>
                         </CarouselView.ItemTemplate>
                     </CarouselView>
@@ -49,7 +50,7 @@
                                      Margin="10,20,0,0"
                                      BackgroundColor="Transparent"
                                      Source="closeRoundedIcon.png"
-                                     x:Name="BtnBack" />
+                                     x:Name="BtnBack" Clicked="BtnBack_Clicked"/>
                     <Label BackgroundColor="#303F9F"
                                VerticalTextAlignment="Center"
                                HorizontalTextAlignment="Center"
@@ -184,17 +185,17 @@
                                 TextColor="White"
                                 BackgroundColor="#303F9F"
                                 Grid.Column="0"
-                                x:Name="BtnEmail"/>
+                                x:Name="BtnEmail" Clicked="BtnEmail_Clicked"/>
                     <Button Text="SMS"
                                 TextColor="White"
                                 BackgroundColor="#303F9F"
                                 Grid.Column="1"
-                                x:Name="BtnSms"/>
+                                x:Name="BtnSms" Clicked="BtnSms_Clicked"/>
                     <Button Text="CALL"
                                 TextColor="White"
                                 BackgroundColor="#303F9F"
                                 Grid.Column="2"
-                                x:Name="BtnCall" />
+                                x:Name="BtnCall" Clicked="BtnCall_Clicked"/>
                 </Grid>
             </StackLayout>
         </ScrollView>

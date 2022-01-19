@@ -23,6 +23,7 @@ namespace RealWorldApp.Models
         public string email { get; set; }
         public string phone { get; set; }
         public string imageUrl { get; set; }
+        public string FullImageUrl => $"http://cvehicles.azurewebsites.net/{imageUrl}";
     }
 
     public class Image
@@ -31,5 +32,6 @@ namespace RealWorldApp.Models
         public string imageUrl { get; set; }
         public int vehicleId { get; set; }
         public object imageArray { get; set; }
+        public string FullImageUrl => $"http://cvehicles.azurewebsites.net/{imageUrl}";
     }
 }

@@ -24,7 +24,8 @@
                 </Frame.GestureRecognizers>
             </Frame>
             <CollectionView x:Name="CvVehicles"
-                            SelectionMode="Single">
+                            SelectionMode="Single"
+                            SelectionChanged="CvVehicles_SelectionChanged">
                 <CollectionView.Header>
                     <StackLayout Spacing="20"
                                  Padding="5">

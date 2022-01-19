@@ -32,5 +32,11 @@ namespace RealWorldApp.Pages
             }
             CvVehicles.ItemsSource = HotVehicleCollection;
         }
+
+        private void CvVehicles_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var currentSelection = e.CurrentSelection.FirstOrDefault() as HotAndNewAd;
+            Navigation.PushModalAsync(new ItemDetailPage(currentSelection.id));
+        }
     }
 }

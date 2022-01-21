@@ -45,6 +45,7 @@ namespace RealWorldApp.Services
             var jsonResult = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<Token>(jsonResult);
             Preferences.Set("accessToken", result.access_token);
+            Preferences.Set("userId", result.user_Id);
             return true;
         }
 

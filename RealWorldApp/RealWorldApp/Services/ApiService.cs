@@ -7,10 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using System.Net.Http.Headers;
+using UnixTimeStamp;
 
 namespace RealWorldApp.Services
 {
-    public class ApiService
+    public static class ApiService
     {
         public static async Task<bool> RegisterUser(string name, string email, string password)
         {
@@ -46,6 +47,9 @@ namespace RealWorldApp.Services
             var result = JsonConvert.DeserializeObject<Token>(jsonResult);
             Preferences.Set("accessToken", result.access_token);
             Preferences.Set("userId", result.user_Id);
+            Preferences.Set("tokenExpirationTime", result.expiration_Time);
+            //Epox.Unix.TimeStamp -> NuGet
+            Preferences.Set("currentTime", UnixTime.GetCurrentTime());
             return true;
         }
 
@@ -57,7 +61,7 @@ namespace RealWorldApp.Services
                 NewPassword = newPassword,
                 ConfirmPassword = confirmPassword
             };
-
+            await TokenValidator.CheckTokenValidity();
             var httpClient = new HttpClient();
             var json = JsonConvert.SerializeObject(changePasswordModel);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -69,6 +73,7 @@ namespace RealWorldApp.Services
 
         public static async Task<bool> EditPhoneNumber(string phoneNumber)
         {
+            await TokenValidator.CheckTokenValidity();
             var httpClient = new HttpClient();
             var content = new StringContent($"Number={phoneNumber}", Encoding.UTF8, "application/x-www-form-urlencoded");
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", Preferences.Get("accessToken", string.Empty));
@@ -79,6 +84,7 @@ namespace RealWorldApp.Services
 
         public static async Task<bool> EditUserProfile(byte[] imageArray)
         {
+            await TokenValidator.CheckTokenValidity();
             var httpClient = new HttpClient();
             var json = JsonConvert.SerializeObject(imageArray);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -90,6 +96,7 @@ namespace RealWorldApp.Services
 
         public static async Task<UserImageModel> GetUserProfileImage()
         {
+            await TokenValidator.CheckTokenValidity();
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", Preferences.Get("accessToken", string.Empty));
             var response = await httpClient.GetStringAsync("https://cvehicles.azurewebsites.net/api/accounts/UserProfileImage");
@@ -98,6 +105,7 @@ namespace RealWorldApp.Services
 
         public static async Task<List<Category>> GetCategories()
         {
+            await TokenValidator.CheckTokenValidity();
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", Preferences.Get("accessToken", string.Empty));
             var response = await httpClient.GetStringAsync("https://cvehicles.azurewebsites.net/api/Categories");
@@ -111,7 +119,7 @@ namespace RealWorldApp.Services
                 VehicleId = vehicleId,
                 ImageArray = imageArray
             };
-
+            await TokenValidator.CheckTokenValidity();
             var httpClient = new HttpClient();
             var json = JsonConvert.SerializeObject(vehicleImage);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -123,6 +131,7 @@ namespace RealWorldApp.Services
 
         public static async Task<VehicleDetail> GetVehicleDetail(int id)
         {
+            await TokenValidator.CheckTokenValidity();
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", Preferences.Get("accessToken", string.Empty));
             var response = await httpClient.GetStringAsync($"https://cvehicles.azurewebsites.net/api/Vehicles/VehicleDetails?id={id}");
@@ -131,6 +140,7 @@ namespace RealWorldApp.Services
 
         public static async Task<List<VehicleByCategory>> GetVehicleCategory(int categoryId)
         {
+            await TokenValidator.CheckTokenValidity();
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", Preferences.Get("accessToken", string.Empty));
             var response = await httpClient.GetStringAsync($"https://cvehicles.azurewebsites.net/api/Vehicles?categoryId={categoryId}");
@@ -139,6 +149,7 @@ namespace RealWorldApp.Services
 
         public static async Task<List<SearchVehicle>> SearchVehicle(string search)
         {
+            await TokenValidator.CheckTokenValidity();
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", Preferences.Get("accessToken", string.Empty));
             var response = await httpClient.GetStringAsync($"https://cvehicles.azurewebsites.net/api/Vehicles/SearchVehicles?search={search}");
@@ -147,6 +158,7 @@ namespace RealWorldApp.Services
 
         public static async Task<VehicleResponse> AddVehicle(Vehicle vehicle)
         {
+            await TokenValidator.CheckTokenValidity();
             var httpClient = new HttpClient();
             var json = JsonConvert.SerializeObject(vehicle);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -158,18 +170,36 @@ namespace RealWorldApp.Services
 
         public static async Task<List<HotAndNewAd>> GetHotAndNewAds()
         {
+            await TokenValidator.CheckTokenValidity();
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", Preferences.Get("accessToken", string.Empty));
             var response = await httpClient.GetStringAsync("https://cvehicles.azurewebsites.net/api/Vehicles/HotAndNewAds");
             return JsonConvert.DeserializeObject<List<HotAndNewAd>>(response);
         }
-
-        public static async Task<List<MyAd>> GetMyAds(string search)
+        //public static async Task<List<MyAd>> GetMyAds(string search)
+        public static async Task<List<MyAd>> GetMyAds()
         {
+            await TokenValidator.CheckTokenValidity();
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", Preferences.Get("accessToken", string.Empty));
             var response = await httpClient.GetStringAsync("https://cvehicles.azurewebsites.net/api/Vehicles/MyAds");
             return JsonConvert.DeserializeObject<List<MyAd>>(response);
+        }
+    }
+
+    public static class TokenValidator
+    {
+        public static async Task CheckTokenValidity()
+        {
+            var expirationTime = Preferences.Get("tokenExpirationTime", 0);
+            Preferences.Set("currentTime", UnixTime.GetCurrentTime());
+            var currentTime = Preferences.Get("currentTime", 0);
+            if(expirationTime < currentTime)
+            {
+                var email = Preferences.Get("email", string.Empty);
+                var password = Preferences.Get("password", string.Empty);
+                await ApiService.Login(email, password);
+            }
         }
     }
 }

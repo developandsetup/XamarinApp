@@ -30,7 +30,7 @@
                                    TextColor="Black"
                                    x:Name="LblUsed" />
                             <Frame.GestureRecognizers>
-                                <TapGestureRecognizer x:Name="TapUsed" />
+                                <TapGestureRecognizer x:Name="TapUsed" Tapped="TapUsed_Tapped"/>
                             </Frame.GestureRecognizers>
                         </Frame>
                         <Frame HasShadow="False"
@@ -43,7 +43,7 @@
                                    TextColor="Black"
                                    x:Name="LblNew" />
                             <Frame.GestureRecognizers>
-                                <TapGestureRecognizer x:Name="TapNew" />
+                                <TapGestureRecognizer x:Name="TapNew" Tapped="TapNew_Tapped"/>
                             </Frame.GestureRecognizers>
                         </Frame>
                     </StackLayout>
@@ -60,7 +60,9 @@
                            FontSize="Medium"
                            Text="Categories*" />
                     <Picker Title="Choose Category"
-                            x:Name="PickerCategory" />
+                            x:Name="PickerCategory" 
+                            ItemDisplayBinding="{Binding type}"
+                            SelectedIndexChanged="PickerCategory_SelectedIndexChanged"/>
                     <Label HorizontalTextAlignment="Start"
                            FontSize="Medium"
                            Text="Engine*" />
